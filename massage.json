@@ -1,0 +1,11 @@
+{
+            "data":{
+                "deviceId":"",
+                "temperature":"",
+                "location":{
+                    "latitude":"",
+                    "longitude":""
+                    },
+                "time":""
+                }
+}

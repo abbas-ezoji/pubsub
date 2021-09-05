@@ -1,0 +1,50 @@
+import datetime
+from django.utils import timezone
+from django.db import models
+from .task import pub_async, sub_async
+
+device_status = (
+    (1, ("Send")),
+    (0, ("Stop")),
+)
+
+
+class Device(models.Model):
+    name = models.CharField('Name', max_length=60)
+    device_id = models.CharField('DeviceId', max_length=60)
+    latitude = models.FloatField('Latitude')
+    longitude = models.FloatField('Longitude')
+    status = models.IntegerField(choices=device_status, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = 'Device'
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            super().save(*args, **kwargs)
+
+        if self.status == 1:
+            pub_async.delay(device_id=self.device_id, latitude=self.latitude, longitude=self.longitude)
+
+        super(Device, self).save(*args, **kwargs)
+
+
+class Temperature(models.Model):
+    device = models.ForeignKey(Device, on_delete=models.CASCADE)
+    time = models.IntegerField()
+    temperature = models.IntegerField()
+
+    def __str__(self):
+        return self.device.name + '--' + str(self.temperature) + '--' + str(self.time)
+
+    class Meta:
+        verbose_name_plural = 'Device Temperatures'
+
+    def was_published_recently(self):
+        now = timezone.now()
+        return now - datetime.timedelta(hours=1) <= datetime.fromtimestamp(self.time) <= now
+
+
