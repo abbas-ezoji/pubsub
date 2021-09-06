@@ -19,3 +19,18 @@ class Devices(generics.ListAPIView):
             device = subpub.Device.objects.all()
 
         return device
+
+
+@permission_classes([AllowAny, ])
+class DevicesAgg(generics.ListAPIView):
+    queryset = subpub.Temperature.objects.all()
+    serializer_class = serializers.SerializerDevice
+
+    def get_queryset(self):
+        d_id = int(self.request.GET.get('id', 0))
+        if d_id:
+            device = subpub.Device.objects.all().filter(pk=d_id)
+        else:
+            device = subpub.Device.objects.all()
+
+        return device

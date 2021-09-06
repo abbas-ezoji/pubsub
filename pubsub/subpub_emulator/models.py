@@ -1,6 +1,7 @@
 import datetime
 from django.utils import timezone
 from django.db import models
+from django.db.models import Avg, Max, Min, Count
 from .task import pub_async, sub_async
 
 device_status = (
@@ -15,6 +16,22 @@ class Device(models.Model):
     latitude = models.FloatField('Latitude')
     longitude = models.FloatField('Longitude')
     status = models.IntegerField(choices=device_status, null=True, blank=True)
+
+    def max_temp(self):
+        d = Device.objects.filter(id=self.id).annotate(num_temp=Max('temperature'))
+        return d[0].num_temp
+
+    def min_temp(self):
+        d = Device.objects.filter(id=self.id).annotate(num_temp=Min('temperature'))
+        return d[0].num_temp
+
+    def avg_temp(self):
+        d = Device.objects.filter(id=self.id).annotate(num_temp=Avg('temperature'))
+        return d[0].num_temp
+
+    def count_temp(self):
+        d = Device.objects.filter(id=self.id).annotate(num_temp=Count('temperature'))
+        return d[0].num_temp
 
     def __str__(self):
         return self.name
