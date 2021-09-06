@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'api',
     'django_plotly_dash.apps.DjangoPlotlyDashConfig',
     'channels',
+    'data_analysis'
 ]
 CHANNEL_LAYERS = {
     'default': {
